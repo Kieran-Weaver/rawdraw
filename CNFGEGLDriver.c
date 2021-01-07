@@ -512,12 +512,12 @@ void AndroidMakeFullscreen()
 {
 	//Partially based on https://stackoverflow.com/questions/47507714/how-do-i-enable-full-screen-immersive-mode-for-a-native-activity-ndk-app
 	const struct JNINativeInterface * env = 0;
-	const struct JNINativeInterface ** envptr = &env;
-	const struct JNIInvokeInterface ** jniiptr = gapp->activity->vm;
-	const struct JNIInvokeInterface * jnii = *jniiptr;
+	JNIEnv* envptr = (JNIEnv*)&env;
+	JavaVM* jniiptr = gapp->activity->vm;
+	const struct JNIInvokeInterface * jnii = *(const struct JNIInvokeInterface **)jniiptr;
 
 	jnii->AttachCurrentThread( jniiptr, &envptr, NULL);
-	env = (*envptr);
+	env = *(const struct JNINativeInterface **)(envptr);
 
 	//Get android.app.NativeActivity, then get getWindow method handle, returns view.Window type
 	jclass activityClass = env->FindClass( envptr, "android/app/NativeActivity");
@@ -565,12 +565,12 @@ void AndroidDisplayKeyboard(int pShow)
 	//Based on https://stackoverflow.com/questions/5864790/how-to-show-the-soft-keyboard-on-native-activity
 	jint lFlags = 0;
 	const struct JNINativeInterface * env = 0;
-	const struct JNINativeInterface ** envptr = &env;
-	const struct JNIInvokeInterface ** jniiptr = gapp->activity->vm;
-	const struct JNIInvokeInterface * jnii = *jniiptr;
+	JNIEnv* envptr = (JNIEnv*)&env;
+	JavaVM* jniiptr = gapp->activity->vm;
+	const struct JNIInvokeInterface * jnii = *(const struct JNIInvokeInterface **)jniiptr;
 
 	jnii->AttachCurrentThread( jniiptr, &envptr, NULL);
-	env = (*envptr);
+	env = *(const struct JNINativeInterface **)(envptr);
 	jclass activityClass = env->FindClass( envptr, "android/app/NativeActivity");
 
 	// Retrieves NativeActivity.
@@ -619,12 +619,12 @@ int AndroidGetUnicodeChar( int keyCode, int metaState )
 
 	int eventType = AKEY_EVENT_ACTION_DOWN;
 	const struct JNINativeInterface * env = 0;
-	const struct JNINativeInterface ** envptr = &env;
-	const struct JNIInvokeInterface ** jniiptr = gapp->activity->vm;
-	const struct JNIInvokeInterface * jnii = *jniiptr;
+	JNIEnv* envptr = (JNIEnv*)&env;
+	JavaVM* jniiptr = gapp->activity->vm;
+	const struct JNIInvokeInterface * jnii = *(const struct JNIInvokeInterface **)jniiptr;
 
 	jnii->AttachCurrentThread( jniiptr, &envptr, NULL);
-	env = (*envptr);
+	env = *(const struct JNINativeInterface **)(envptr);
 	//jclass activityClass = env->FindClass( envptr, "android/app/NativeActivity");
 	// Retrieves NativeActivity.
 	//jobject lNativeActivity = gapp->activity->clazz;
@@ -648,10 +648,10 @@ int AndroidGetUnicodeChar( int keyCode, int metaState )
 
 //Based on: https://stackoverflow.com/questions/41820039/jstringjni-to-stdstringc-with-utf8-characters
 
-jstring android_permission_name(const struct JNINativeInterface ** envptr, const char* perm_name) {
+jstring android_permission_name(JNIEnv * envptr, const char* perm_name) {
     // nested class permission in class android.Manifest,
     // hence android 'slash' Manifest 'dollar' permission
-	const struct JNINativeInterface * env = *envptr;
+	const struct JNINativeInterface * env = *(const struct JNINativeInterface **)envptr;
     jclass ClassManifestpermission = env->FindClass( envptr, "android/Manifest$permission");
     jfieldID lid_PERM = env->GetStaticFieldID( envptr, ClassManifestpermission, perm_name, "Ljava/lang/String;" );
     jstring ls_PERM = (jstring)(env->GetStaticObjectField( envptr, ClassManifestpermission, lid_PERM )); 
@@ -671,9 +671,9 @@ int AndroidHasPermissions( const char* perm_name)
 {
 	struct android_app* app = gapp;
 	const struct JNINativeInterface * env = 0;
-	const struct JNINativeInterface ** envptr = &env;
-	const struct JNIInvokeInterface ** jniiptr = app->activity->vm;
-	const struct JNIInvokeInterface * jnii = *jniiptr;
+	JNIEnv* envptr = (JNIEnv*)&env;
+	JavaVM* jniiptr = app->activity->vm;
+	const struct JNIInvokeInterface * jnii = *(const struct JNIInvokeInterface **)jniiptr;
 
 	if( android_sdk_version < 23 )
 	{
@@ -682,7 +682,7 @@ int AndroidHasPermissions( const char* perm_name)
 	}
 
 	jnii->AttachCurrentThread( jniiptr, &envptr, NULL);
-	env = (*envptr);
+	env = *(const struct JNINativeInterface **)(envptr);
 
 	int result = 0;
 	jstring ls_PERM = android_permission_name( envptr, perm_name);
@@ -724,11 +724,11 @@ void AndroidRequestAppPermissions(const char * perm)
 
 	struct android_app* app = gapp;
 	const struct JNINativeInterface * env = 0;
-	const struct JNINativeInterface ** envptr = &env;
-	const struct JNIInvokeInterface ** jniiptr = app->activity->vm;
-	const struct JNIInvokeInterface * jnii = *jniiptr;
+	JNIEnv* envptr = (JNIEnv*)&env;
+	JavaVM* jniiptr = app->activity->vm;
+	const struct JNIInvokeInterface * jnii = *(const struct JNIInvokeInterface **)jniiptr;
 	jnii->AttachCurrentThread( jniiptr, &envptr, NULL);
-	env = (*envptr);
+	env = *(const struct JNINativeInterface **)(envptr);
 	jobject activity = app->activity->clazz;
 
 	jobjectArray perm_array = env->NewObjectArray( envptr, 1, env->FindClass( envptr, "java/lang/String"), env->NewStringUTF( envptr, "" ) );
@@ -754,11 +754,11 @@ void AndroidSendToBack( int param )
 {
 	struct android_app* app = gapp;
 	const struct JNINativeInterface * env = 0;
-	const struct JNINativeInterface ** envptr = &env;
-	const struct JNIInvokeInterface ** jniiptr = app->activity->vm;
-	const struct JNIInvokeInterface * jnii = *jniiptr;
+	JNIEnv* envptr = (JNIEnv*)&env;
+	JavaVM* jniiptr = app->activity->vm;
+	const struct JNIInvokeInterface * jnii = *(const struct JNIInvokeInterface **)jniiptr;
 	jnii->AttachCurrentThread( jniiptr, &envptr, NULL);
-	env = (*envptr);
+	env = *(const struct JNINativeInterface **)(envptr);
 	jobject activity = app->activity->clazz;
 
 	//_glfmCallJavaMethodWithArgs(jni, gapp->activity->clazz, "moveTaskToBack", "(Z)Z", Boolean, false);
